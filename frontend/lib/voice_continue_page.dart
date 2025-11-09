@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'create_account_page.dart';
-import 'main.dart'; // Importar HomeScreen
+import 'main.dart';
+import 'services/speech_service.dart';
 
 class VoiceContinuePage extends StatefulWidget {
   const VoiceContinuePage({Key? key}) : super(key: key);
 
   static Route route() {
-    return MaterialPageRoute<void>(builder: (_) => const VoiceContinuePage());
+    return MaterialPageRoute(builder: (_) => const VoiceContinuePage());
   }
 
   @override
@@ -16,19 +17,66 @@ class VoiceContinuePage extends StatefulWidget {
 class _VoiceContinuePageState extends State<VoiceContinuePage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final SpeechService _speechService = SpeechService();
   bool _obscure = true;
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initSpeech();
+  }
+
+  Future<void> _initSpeech() async {
+    await _speechService.initialize();
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (mounted) _speakPageContent();
+  }
+
+  Future<void> _speakPageContent() async {
+    await _speechService.speak("Pantalla de inicio de sesión. Di iniciar sesión para continuar, o di crear cuenta para registrarte.");
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) _startVoiceListening();
+  }
+
+  void _startVoiceListening() {
+    if (!mounted) return;
+    setState(() => _isListening = true);
+    
+    _speechService.startListening(
+      onResult: (text) {
+        String? command = _speechService.detectCommand(text);
+        if (command == 'login') {
+          _speechService.speak('Iniciando sesión');
+          _login();
+        } else if (command == 'register') {
+          _speechService.speak('Abriendo registro');
+          Navigator.of(context).push(CreateAccountPage.route());
+        }
+      },
+      onComplete: () {
+        if (mounted) setState(() => _isListening = false);
+      },
+    );
+  }
+
+  void _login() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _speechService.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: const Color(0xFFF3F7FB),
       body: SafeArea(
@@ -38,10 +86,8 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // top logo / title
                 Column(
                   children: [
-                    // If you have a logo asset, replace with Image.asset(...)
                     const SizedBox(height: 8),
                     Text('WalkYou',
                         style: theme.textTheme.titleLarge?.copyWith(
@@ -50,14 +96,12 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                           fontSize: 22,
                         )),
                     const SizedBox(height: 6),
-          Text('Iniciar sesión / Registrarse',
-            style: theme.textTheme.bodySmall),
+                    Text('Iniciar sesión / Registrarse',
+                        style: theme.textTheme.bodySmall),
                   ],
                 ),
-
                 const SizedBox(height: 18),
 
-                // main phone-like card
                 Container(
                   padding: const EdgeInsets.all(18),
                   width: double.infinity,
@@ -80,10 +124,8 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
                           )),
-
                       const SizedBox(height: 18),
 
-                      // Optional decorative image (replace with your asset)
                       if (true)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 10),
@@ -94,9 +136,8 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                                 'assets/images/voice_page.png',
                                 fit: BoxFit.contain,
                                 errorBuilder: (context, error, stack) {
-                                  // If the asset is missing, show a placeholder
                                   return const Icon(
-                                    Icons.phone_iphone,
+                                    Icons.mic,
                                     size: 72,
                                     color: Colors.blueAccent,
                                   );
@@ -106,7 +147,24 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                           ),
                         ),
 
-                      // Email input
+                      if (_isListening)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.mic, color: Colors.blue, size: 20),
+                              SizedBox(width: 8),
+                              Text('Escuchando comandos...', style: TextStyle(color: Colors.blue)),
+                            ],
+                          ),
+                        ),
+
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -120,10 +178,8 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                               vertical: 14, horizontal: 12),
                         ),
                       ),
-
                       const SizedBox(height: 12),
 
-                      // Password input
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscure,
@@ -145,17 +201,10 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                               vertical: 14, horizontal: 12),
                         ),
                       ),
-
                       const SizedBox(height: 18),
 
-                      // Sign in button
                       ElevatedButton(
-                        onPressed: () {
-                          // Demo mode: Login sin validación - va directo al HomeScreen
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (_) => const HomeScreen()),
-                          );
-                        },
+                        onPressed: _login,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -164,20 +213,14 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                         ),
                         child: const Text('Iniciar sesión'),
                       ),
-
                       const SizedBox(height: 8),
-
                       Center(
                         child: TextButton(
-                          onPressed: () {
-                            // TODO: implementar recuperación de contraseña
-                          },
+                          onPressed: () {},
                           child: const Text('¿Olvidaste tu contraseña?'),
                         ),
                       ),
-
                       const SizedBox(height: 8),
-
                       OutlinedButton.icon(
                         onPressed: () {
                           Navigator.push(context, CreateAccountPage.route());

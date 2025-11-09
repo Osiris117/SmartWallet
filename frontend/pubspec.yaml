@@ -2,6 +2,7 @@ name: smart_wallet
 description: A Flutter frontend for SmartWallet - Osiris117
 publish_to: 'none'
 version: 0.1.0
+
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
@@ -16,6 +17,8 @@ dependencies:
   intl: ^0.18.0
   http: ^1.1.0
   url_launcher: ^6.2.1
+  speech_to_text: ^7.3.0
+  flutter_tts: ^4.0.2
 
 dev_dependencies:
   flutter_test:
@@ -29,7 +32,10 @@ flutter:
     - assets/images/
     - assets/images/coin.svg
     - assets/images/character.svg
+    - assets/videos/
     - assets/videos/Intro.mp4
+    - assets/videos/Senas.mp4
+    - assets/videos/Congrat.mp4
 
 flutter_icons:
   android: true

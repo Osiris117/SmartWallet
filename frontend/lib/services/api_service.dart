@@ -5,7 +5,7 @@ import '../models/payment_models.dart';
 
 class ApiService {
   // URL del backend - cambiar según el entorno
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'http://localhost:3001/api';
   
   // Headers comunes
   static Map<String, String> get _headers => {

@@ -4,7 +4,9 @@ import 'package:smart_wallet/services/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SendMoneyPage extends StatefulWidget {
-  const SendMoneyPage({Key? key}) : super(key: key);
+  final double? initialAmount;
+  
+  const SendMoneyPage({Key? key, this.initialAmount}) : super(key: key);
 
   static Route route() {
     return MaterialPageRoute<void>(builder: (_) => const SendMoneyPage());
@@ -17,22 +19,28 @@ class SendMoneyPage extends StatefulWidget {
 class _SendMoneyPageState extends State<SendMoneyPage> {
   final _urlController = TextEditingController();
   final _amountController = TextEditingController();
-  String _selectedCurrency = 'USD'; // CAMBIAR A USD POR DEFECTO
+  
+  String _selectedCurrency = 'USD';
   bool _isRadioActive = false;
   bool _isLoading = false;
 
-  // Wallet del remitente (configurar según tu setup)
   final String _senderWalletUrl = 'https://ilp.interledger-test.dev/arely';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialAmount != null) {
+      _amountController.text = widget.initialAmount!.toString();
+    }
+  }
 
   void _toggleRadio() {
     setState(() {
       _isRadioActive = !_isRadioActive;
     });
-    // Aquí iría la lógica real de activar/desactivar radio
   }
 
   Future<void> _sendMoney() async {
-    // Validaciones
     if (_urlController.text.trim().isEmpty) {
       _showError('Por favor ingresa la URL del receptor');
       return;
@@ -52,7 +60,6 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Preparar URL del receptor (agregar https:// si no lo tiene)
       String receiverUrl = _urlController.text.trim();
       if (!receiverUrl.startsWith('http')) {
         receiverUrl = 'https://$receiverUrl';
@@ -61,15 +68,11 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
       print('🔄 Iniciando transferencia...');
       print('📤 Remitente: $_senderWalletUrl');
       print('📥 Receptor: $receiverUrl');
-      print('💰 Monto original: $amount ${_selectedCurrency}');
+      print('💰 Monto original: $amount $_selectedCurrency');
 
-      // Para ILP, el monto debe estar en la escala correcta del asset
-      // Para USD con assetScale=2, $1.00 = 100 unidades base
-      // Para MXN con assetScale=2, $1.00 = 100 unidades base
       final amountInBaseUnits = (amount * 100).toInt().toString();
       print('💵 Monto en unidades base: $amountInBaseUnits');
 
-      // Llamar al API para realizar la transferencia
       final response = await ApiService.simpleTransfer(
         senderWalletUrl: _senderWalletUrl,
         receiverWalletUrl: receiverUrl,
@@ -84,7 +87,6 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
       if (response.success) {
         if (response.requiresAuthorization && response.authorizationUrl != null) {
           print('🔐 Requiere autorización');
-          // Mostrar diálogo para autorizar
           _showAuthorizationDialog(
             response.authorizationUrl!,
             response.grantId!,
@@ -94,7 +96,6 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
             amount,
           );
         } else if (response.outgoingPayment != null) {
-          // Pago completado exitosamente
           print('✅ Pago completado');
           _navigateToSuccess(receiverUrl, amount);
         }
@@ -125,13 +126,13 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
         title: const Text('Autorización Requerida'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
+          children: const [
+            Text(
               'Para completar la transferencia, debes autorizar el pago en tu navegador.',
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            const Icon(Icons.security, size: 48, color: Colors.blue),
+            SizedBox(height: 16),
+            Icon(Icons.security, size: 48, color: Colors.blue),
           ],
         ),
         actions: [
@@ -141,13 +142,11 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              // Abrir URL de autorización
               final uri = Uri.parse(authUrl);
               if (await canLaunchUrl(uri)) {
                 await launchUrl(uri, mode: LaunchMode.externalApplication);
                 Navigator.pop(context);
                 
-                // Mostrar diálogo de espera
                 _showWaitingDialog(grantId, continueToken, quoteId, receiverUrl, amount);
               } else {
                 _showError('No se pudo abrir el navegador');
@@ -307,7 +306,6 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
               ),
               const SizedBox(height: 24),
               
-              // URL Field with radio button
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -349,7 +347,6 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
 
               const SizedBox(height: 16),
 
-              // Amount and Currency Field
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -392,7 +389,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                             ),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                           ),
-                          items: ['USD'].map((String value) { // SOLO USD
+                          items: ['USD'].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(value),
@@ -407,9 +404,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.language, color: Colors.grey),
-                        onPressed: () {
-                          // Aquí iría la lógica de conversión de moneda
-                        },
+                        onPressed: () {},
                       ),
                     ],
                   ),
@@ -418,7 +413,6 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
 
               const Spacer(),
 
-              // Send Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3B82F6),

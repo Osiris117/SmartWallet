@@ -3,8 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
 import 'voice_continue_page.dart';
+import 'signs_continue_page.dart';
+import 'pages/home_options_page.dart';
 import 'pages/send_money_page.dart';
 import 'pages/receive_page.dart';
+import 'services/speech_service.dart';
 
 void main() {
   runApp(const DeopayApp());
@@ -24,7 +27,7 @@ class DeopayApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.interTextTheme(),
       ),
-      home: const WelcomeScreen(), // Pantalla de bienvenida con login
+      home: const WelcomeScreen(),
     );
   }
 }
@@ -37,31 +40,88 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  late VideoPlayerController _controller;
+  VideoPlayerController? _controller;
+  final SpeechService _speechService = SpeechService();
+  bool _isListening = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/videos/Intro.mp4')
-      ..initialize().then((_) {
-        _controller.setLooping(true);
-        _controller.setVolume(0.0);
-        _controller.play();
-        setState(() {});
-      });
+    _initVideo();
+    _initSpeech();
+  }
+
+  Future<void> _initSpeech() async {
+    await _speechService.initialize();
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (mounted) _speakWelcomeMessage();
+  }
+
+  Future<void> _speakWelcomeMessage() async {
+    await _speechService.speak("Bienvenido a Walk You. Selecciona tu modo de uso. Di voz o señas.");
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) _startVoiceListening();
+  }
+
+  void _startVoiceListening() {
+    if (!mounted) return;
+    setState(() => _isListening = true);
+    
+    _speechService.startListening(
+      onResult: (text) {
+        _processVoiceCommand(text);
+      },
+      onComplete: () {
+        if (mounted) {
+          setState(() => _isListening = false);
+        }
+      },
+    );
+  }
+
+  void _processVoiceCommand(String text) {
+    String? command = _speechService.detectCommand(text);
+    
+    if (command == 'voice') {
+      _speechService.speak('Modo de voz seleccionado');
+      _goToVoiceMode();
+    } else if (command == 'signs') {
+      _speechService.speak('Modo de señas seleccionado');
+      _goToSignsMode();
+    }
+  }
+
+  Future<void> _initVideo() async {
+    try {
+      _controller = VideoPlayerController.asset('assets/videos/Intro.mp4')
+        ..initialize().then((_) {
+          if (mounted) {
+            _controller!.setLooping(true);
+            _controller!.setVolume(0.0);
+            _controller!.play();
+            setState(() {});
+          }
+        });
+    } catch (e) {
+      print('Error loading video: $e');
+    }
+  }
+
+  void _goToVoiceMode() {
+    _speechService.stopListening();
+    Navigator.push(context, VoiceContinuePage.route());
+  }
+
+  void _goToSignsMode() {
+    _speechService.stopListening();
+    Navigator.push(context, SignsContinuePage.route());
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
+    _speechService.dispose();
     super.dispose();
-  }
-
-  void _goToHome(String mode) {
-    // Demo mode: Acceso directo sin validación
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
   }
 
   @override
@@ -78,14 +138,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset('assets/images/Logo.png', height: 48),
+                    Image.asset('assets/images/Logof.png', height: 48, errorBuilder: (c, e, s) => const Icon(Icons.account_balance_wallet, size: 48)),
                     const SizedBox(width: 10),
                     Text(
                       'WalkYou',
                       style: GoogleFonts.inter(
                         fontSize: 26,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF2B6EDC), // azul parecido al mockup
+                        color: const Color(0xFF2B6EDC),
                       ),
                     ),
                   ],
@@ -96,26 +156,47 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               const SizedBox(height: 8),
               const Text('Tu billetera digital, accesible para todos.', style: TextStyle(color: Colors.black54), textAlign: TextAlign.center),
               const SizedBox(height: 24),
+              
               Expanded(
                 child: Center(
-                  child: _controller.value.isInitialized
-                      ? AspectRatio(aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller))
+                  child: _controller != null && _controller!.value.isInitialized
+                      ? AspectRatio(aspectRatio: _controller!.value.aspectRatio, child: VideoPlayer(_controller!))
                       : Container(
                           width: 240,
                           height: 240,
                           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-                          child: const Center(child: CircularProgressIndicator()),
+                          child: const Center(child: Icon(Icons.account_balance_wallet, size: 80, color: Colors.grey)),
                         ),
                 ),
               ),
+              
               const SizedBox(height: 16),
+
+              if (_isListening)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade100,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.mic, color: Colors.blue, size: 20),
+                      SizedBox(width: 8),
+                      Text('Escuchando...', style: TextStyle(color: Colors.blue)),
+                    ],
+                  ),
+                ),
+              
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3B82F6),
                   minimumSize: const Size.fromHeight(54),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => Navigator.push(context, VoiceContinuePage.route()),
+                onPressed: _goToVoiceMode,
                 icon: const Icon(Icons.mic, color: Colors.white),
                 label: const Text('Continuar con Voz', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
@@ -126,7 +207,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   minimumSize: const Size.fromHeight(54),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => _goToHome('signs'),
+                onPressed: _goToSignsMode,
                 icon: const Icon(Icons.pan_tool, color: Colors.white),
                 label: const Text('Continuar con Señas', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
@@ -196,7 +277,6 @@ class _TopHeader extends StatelessWidget {
 class _StackedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Creates a rounded top area with a card overlapping
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -223,7 +303,7 @@ class _StackedCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0,8))],
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 8))],
             ),
             child: Row(
               children: [
@@ -242,7 +322,7 @@ class _StackedCard extends StatelessWidget {
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -351,7 +431,15 @@ class _PromoCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(width: 72, height: 72, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.wallet, color: Colors.white))
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.wallet, color: Colors.white),
+          )
         ],
       ),
     );
@@ -363,7 +451,11 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8)]),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8)],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: const [
@@ -381,6 +473,7 @@ class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool active;
+
   const _NavItem({required this.icon, required this.label, this.active = false});
 
   @override
