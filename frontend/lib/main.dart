@@ -15,7 +15,7 @@ class DeopayApp extends StatelessWidget {
     final seed = const Color(0xFF0F7A66);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Deopay',
+      title: 'WalkYou',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.light),
         useMaterial3: true,
@@ -177,17 +177,11 @@ class _TopHeader extends StatelessWidget {
             Text('What would you like to do today ?', style: TextStyle(color: Colors.black54, fontSize: 12)),
           ],
         ),
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0,2))
-          ]),
-          child: Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: SvgPicture.asset('assets/images/character.svg', fit: BoxFit.contain),
-          ),
-        )
+        CircleAvatar(
+          radius: 22,
+          backgroundColor: Colors.white,
+          backgroundImage: AssetImage('assets/images/Logo.png'),
+        ),
       ],
     );
   }
