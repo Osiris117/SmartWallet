@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'create_account_page.dart';
+import 'main.dart'; // Importar HomeScreen
 
 class VoiceContinuePage extends StatefulWidget {
   const VoiceContinuePage({Key? key}) : super(key: key);
@@ -36,74 +37,74 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // App title / header
-                Text(
-                  'WalkYou',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Iniciar sesión / Registrarse',
-                  style: theme.textTheme.labelSmall,
+                // top logo / title
+                Column(
+                  children: [
+                    // If you have a logo asset, replace with Image.asset(...)
+                    const SizedBox(height: 8),
+                    Text('WalkYou',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        )),
+                    const SizedBox(height: 6),
+          Text('Iniciar sesión / Registrarse',
+            style: theme.textTheme.bodySmall),
+                  ],
                 ),
 
                 const SizedBox(height: 18),
 
-                // main card
+                // main phone-like card
                 Container(
-                  width: double.infinity,
                   padding: const EdgeInsets.all(18),
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color.fromRGBO(0, 0, 0, 0.06),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        '¡Hola de nuevo!',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
+                      Text('¡Hola de nuevo!',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          )),
 
                       const SizedBox(height: 18),
 
                       // Optional decorative image (replace with your asset)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Center(
-                          child: SizedBox(
-                            height: 120,
-                            child: Image.asset(
-                              'assets/images/voice_page.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stack) {
-                                // If the asset is missing, show a placeholder
-                                return const Icon(
-                                  Icons.phone_iphone,
-                                  size: 72,
-                                  color: Colors.blueAccent,
-                                );
-                              },
+                      if (true)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Center(
+                            child: SizedBox(
+                              height: 120,
+                              child: Image.asset(
+                                'assets/images/voice_page.png',
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stack) {
+                                  // If the asset is missing, show a placeholder
+                                  return const Icon(
+                                    Icons.phone_iphone,
+                                    size: 72,
+                                    color: Colors.blueAccent,
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
                       // Email input
                       TextFormField(
@@ -130,11 +131,10 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscure
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.grey[600],
-                            ),
+                                _obscure
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: Colors.grey[600]),
                             onPressed: () => setState(() => _obscure = !_obscure),
                           ),
                           hintText: 'Contraseña',
@@ -151,7 +151,10 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                       // Sign in button
                       ElevatedButton(
                         onPressed: () {
-                          // Implement sign-in logic here
+                          // Demo mode: Login sin validación - va directo al HomeScreen
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),

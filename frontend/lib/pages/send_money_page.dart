@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_wallet/congrats_page.dart';
+import 'package:smart_wallet/pages/transaction_success_page.dart';
+import 'package:smart_wallet/services/api_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SendMoneyPage extends StatefulWidget {
   const SendMoneyPage({Key? key}) : super(key: key);
@@ -15,14 +17,242 @@ class SendMoneyPage extends StatefulWidget {
 class _SendMoneyPageState extends State<SendMoneyPage> {
   final _urlController = TextEditingController();
   final _amountController = TextEditingController();
-  String _selectedCurrency = 'MXN';
+  String _selectedCurrency = 'USD'; // CAMBIAR A USD POR DEFECTO
   bool _isRadioActive = false;
+  bool _isLoading = false;
+
+  // Wallet del remitente (configurar según tu setup)
+  final String _senderWalletUrl = 'https://ilp.interledger-test.dev/arely';
 
   void _toggleRadio() {
     setState(() {
       _isRadioActive = !_isRadioActive;
     });
     // Aquí iría la lógica real de activar/desactivar radio
+  }
+
+  Future<void> _sendMoney() async {
+    // Validaciones
+    if (_urlController.text.trim().isEmpty) {
+      _showError('Por favor ingresa la URL del receptor');
+      return;
+    }
+
+    if (_amountController.text.trim().isEmpty) {
+      _showError('Por favor ingresa un monto');
+      return;
+    }
+
+    final amount = double.tryParse(_amountController.text.trim());
+    if (amount == null || amount <= 0) {
+      _showError('Por favor ingresa un monto válido');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Preparar URL del receptor (agregar https:// si no lo tiene)
+      String receiverUrl = _urlController.text.trim();
+      if (!receiverUrl.startsWith('http')) {
+        receiverUrl = 'https://$receiverUrl';
+      }
+
+      print('🔄 Iniciando transferencia...');
+      print('📤 Remitente: $_senderWalletUrl');
+      print('📥 Receptor: $receiverUrl');
+      print('💰 Monto original: $amount ${_selectedCurrency}');
+
+      // Para ILP, el monto debe estar en la escala correcta del asset
+      // Para USD con assetScale=2, $1.00 = 100 unidades base
+      // Para MXN con assetScale=2, $1.00 = 100 unidades base
+      final amountInBaseUnits = (amount * 100).toInt().toString();
+      print('💵 Monto en unidades base: $amountInBaseUnits');
+
+      // Llamar al API para realizar la transferencia
+      final response = await ApiService.simpleTransfer(
+        senderWalletUrl: _senderWalletUrl,
+        receiverWalletUrl: receiverUrl,
+        amount: amountInBaseUnits,
+        currency: _selectedCurrency,
+      );
+
+      print('📨 Respuesta recibida: success=${response.success}, message=${response.message}');
+
+      setState(() => _isLoading = false);
+
+      if (response.success) {
+        if (response.requiresAuthorization && response.authorizationUrl != null) {
+          print('🔐 Requiere autorización');
+          // Mostrar diálogo para autorizar
+          _showAuthorizationDialog(
+            response.authorizationUrl!,
+            response.grantId!,
+            response.continueToken!,
+            response.quote!.id,
+            receiverUrl,
+            amount,
+          );
+        } else if (response.outgoingPayment != null) {
+          // Pago completado exitosamente
+          print('✅ Pago completado');
+          _navigateToSuccess(receiverUrl, amount);
+        }
+      } else {
+        print('❌ Error: ${response.message}');
+        _showError(response.message.isEmpty ? 'Error desconocido al procesar la transferencia' : response.message);
+      }
+    } catch (e, stackTrace) {
+      setState(() => _isLoading = false);
+      print('❌ Excepción capturada: $e');
+      print('Stack trace: $stackTrace');
+      _showError('Error al procesar la transferencia: $e');
+    }
+  }
+
+  void _showAuthorizationDialog(
+    String authUrl,
+    String grantId,
+    String continueToken,
+    String quoteId,
+    String receiverUrl,
+    double amount,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Autorización Requerida'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Para completar la transferencia, debes autorizar el pago en tu navegador.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            const Icon(Icons.security, size: 48, color: Colors.blue),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // Abrir URL de autorización
+              final uri = Uri.parse(authUrl);
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                Navigator.pop(context);
+                
+                // Mostrar diálogo de espera
+                _showWaitingDialog(grantId, continueToken, quoteId, receiverUrl, amount);
+              } else {
+                _showError('No se pudo abrir el navegador');
+              }
+            },
+            child: const Text('Autorizar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showWaitingDialog(
+    String grantId,
+    String continueToken,
+    String quoteId,
+    String receiverUrl,
+    double amount,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Esperando Autorización'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Presiona "Completar" después de autorizar en el navegador'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _completePayment(grantId, continueToken, quoteId, receiverUrl, amount);
+            },
+            child: const Text('Completar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _completePayment(
+    String grantId,
+    String continueToken,
+    String quoteId,
+    String receiverUrl,
+    double amount,
+  ) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await ApiService.completeOutgoingPayment(
+        senderWalletUrl: _senderWalletUrl,
+        grantId: grantId,
+        continueToken: continueToken,
+        quoteId: quoteId,
+      );
+
+      setState(() => _isLoading = false);
+
+      if (response.success) {
+        _navigateToSuccess(receiverUrl, amount);
+      } else {
+        _showError(response.error ?? 'Error completando el pago');
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showError('Error: $e');
+    }
+  }
+
+  void _navigateToSuccess(String receiverUrl, double amount) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => TransactionSuccessPage(
+          storeName: 'SmartWallet Transfer',
+          transactionNumber: '${DateTime.now().millisecondsSinceEpoch}',
+          transactionDate: DateTime.now(),
+          referenceNumber: '${DateTime.now().microsecondsSinceEpoch}',
+          sourceUser: _senderWalletUrl,
+          destinationNumber: receiverUrl,
+          destinationAlias: receiverUrl.split('/').last,
+          amount: amount,
+          currency: _selectedCurrency,
+          notes: 'Transferencia vía Interledger',
+        ),
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -48,7 +278,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
             padding: const EdgeInsets.all(8.0),
             child: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Image.asset('assets/images/Logof.png', height: 24),
+              child: Image.asset('assets/images/Logo.png', height: 24),
             ),
           ),
           const SizedBox(width: 8),
@@ -66,13 +296,13 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                 children: [
                   Text(
                     'Enviar',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: const Color(0xFF1A2341),
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const SizedBox(width: 8),
-                  Image.asset('assets/images/Logof.png', height: 32),
+                  Image.asset('assets/images/Logo.png', height: 32),
                 ],
               ),
               const SizedBox(height: 24),
@@ -83,8 +313,8 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
-                      BoxShadow(
-                      color: Color.fromRGBO(0,0,0,0.05),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -103,7 +333,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                         duration: const Duration(milliseconds: 300),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _isRadioActive ? Color.fromRGBO(59,130,246,0.1) : Colors.transparent,
+                          color: _isRadioActive ? Colors.blue.withOpacity(0.1) : Colors.transparent,
                         ),
                         child: Icon(
                           Icons.radio_button_checked,
@@ -126,7 +356,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Color.fromRGBO(0,0,0,0.05),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -162,7 +392,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                             ),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                           ),
-                          items: ['MXN', 'USD', 'EUR'].map((String value) {
+                          items: ['USD'].map((String value) { // SOLO USD
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(value),
@@ -197,21 +427,24 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
-                  // Simulación de envío exitoso
-                  // Tras envío exitoso mostramos la pantalla de felicitación (video)
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => const CongratsPage()),
-                  );
-                },
-                child: const Text(
-                  'Enviar',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
+                onPressed: _isLoading ? null : _sendMoney,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Enviar',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
               const SizedBox(height: 16),
             ],
