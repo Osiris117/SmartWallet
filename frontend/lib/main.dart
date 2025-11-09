@@ -68,7 +68,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Center(child: Image.asset('assets/images/Logo.png', height: 56)),
+              Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset('assets/images/Logo.png', height: 48),
+                    const SizedBox(width: 10),
+                    Text(
+                      'WalkYou',
+                      style: GoogleFonts.inter(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2B6EDC), // azul parecido al mockup
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
               const Text('¡Bienvenido a WalkYou!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
