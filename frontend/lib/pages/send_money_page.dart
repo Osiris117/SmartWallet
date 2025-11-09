@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_wallet/pages/transaction_success_page.dart';
+import 'package:smart_wallet/congrats_page.dart';
 
 class SendMoneyPage extends StatefulWidget {
   const SendMoneyPage({Key? key}) : super(key: key);
@@ -48,7 +48,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
             padding: const EdgeInsets.all(8.0),
             child: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Image.asset('assets/images/Logo.png', height: 24),
+              child: Image.asset('assets/images/Logof.png', height: 24),
             ),
           ),
           const SizedBox(width: 8),
@@ -66,13 +66,13 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                 children: [
                   Text(
                     'Enviar',
-                    style: Theme.of(context).textTheme.headline5?.copyWith(
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: const Color(0xFF1A2341),
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const SizedBox(width: 8),
-                  Image.asset('assets/images/Logo.png', height: 32),
+                  Image.asset('assets/images/Logof.png', height: 32),
                 ],
               ),
               const SizedBox(height: 24),
@@ -83,8 +83,8 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      BoxShadow(
+                      color: Color.fromRGBO(0,0,0,0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -103,7 +103,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                         duration: const Duration(milliseconds: 300),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _isRadioActive ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+                          color: _isRadioActive ? Color.fromRGBO(59,130,246,0.1) : Colors.transparent,
                         ),
                         child: Icon(
                           Icons.radio_button_checked,
@@ -126,7 +126,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Color.fromRGBO(0,0,0,0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -199,20 +199,9 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                 ),
                 onPressed: () {
                   // Simulación de envío exitoso
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => TransactionSuccessPage(
-                        storeName: 'TOKO HYPERSHOP.CO',
-                        transactionNumber: '${DateTime.now().millisecondsSinceEpoch}',
-                        transactionDate: DateTime.now(),
-                        referenceNumber: '${DateTime.now().microsecondsSinceEpoch}',
-                        sourceUser: 'Usuario Actual',
-                        destinationNumber: '3436463466643',
-                        destinationAlias: 'Kevin Hypershop',
-                        amount: double.tryParse(_amountController.text) ?? 0.0,
-                        currency: _selectedCurrency,
-                      ),
-                    ),
+                  // Tras envío exitoso mostramos la pantalla de felicitación (video)
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => const CongratsPage()),
                   );
                 },
                 child: const Text(

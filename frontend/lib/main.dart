@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
 import 'voice_continue_page.dart';
+import 'signs_continue_page.dart';
 
 void main() {
   runApp(const DeopayApp());
@@ -55,9 +56,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     super.dispose();
   }
 
-  void _goToHome(String mode) {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
-  }
+  // _goToHome removed – navigation uses explicit routes now
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +72,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset('assets/images/Logo.png', height: 48),
+                    Image.asset('assets/images/Logof.png', height: 48),
                     const SizedBox(width: 10),
                     Text(
                       'WalkYou',
@@ -121,7 +120,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   minimumSize: const Size.fromHeight(54),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => _goToHome('signs'),
+                onPressed: () => Navigator.push(context, SignsContinuePage.route()),
                 icon: const Icon(Icons.pan_tool, color: Colors.white),
                 label: const Text('Continuar con Señas', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
@@ -178,10 +177,10 @@ class _TopHeader extends StatelessWidget {
             Text('What would you like to do today ?', style: TextStyle(color: Colors.black54, fontSize: 12)),
           ],
         ),
-        CircleAvatar(
+                CircleAvatar(
           radius: 22,
           backgroundColor: Colors.white,
-          backgroundImage: AssetImage('assets/images/Logo.png'),
+          backgroundImage: AssetImage('assets/images/Logof.png'),
         ),
       ],
     );
@@ -205,7 +204,7 @@ class _StackedCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Align(
             alignment: Alignment.topLeft,
-            child: Text('DEOPAY', style: TextStyle(color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w700)),
+            child: Text('DEOPAY', style: TextStyle(color: Color.fromRGBO(255,255,255,0.9), fontWeight: FontWeight.w700)),
           ),
         ),
         Positioned(
@@ -218,7 +217,7 @@ class _StackedCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0,8))],
+              boxShadow: [BoxShadow(color: Color.fromRGBO(0,0,0,0.06), blurRadius: 20, offset: const Offset(0,8))],
             ),
             child: Row(
               children: [
@@ -264,7 +263,7 @@ class _ActionButtonsRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFF4E9E7),
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+                  boxShadow: [BoxShadow(color: Color.fromRGBO(0,0,0,0.04), blurRadius: 8)],
                 ),
                 padding: const EdgeInsets.all(12),
                 child: Icon(it['icon'] as IconData, color: const Color(0xFF7A5444)),
@@ -313,7 +312,7 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8)]),
+  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Color.fromRGBO(0,0,0,0.03), blurRadius: 8)]),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: const [

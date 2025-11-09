@@ -23,7 +23,7 @@ class ReceivePage extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Image.asset('assets/images/Logo.png', height: 24),
+              child: Image.asset('assets/images/Logof.png', height: 24),
             ),
           ),
           const SizedBox(width: 8),
@@ -41,13 +41,13 @@ class ReceivePage extends StatelessWidget {
                 children: [
                   Text(
                     'Recibir',
-                    style: Theme.of(context).textTheme.headline5?.copyWith(
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: const Color(0xFF1A2341),
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const SizedBox(width: 8),
-                  Image.asset('assets/images/Logo.png', height: 32),
+                  Image.asset('assets/images/Logof.png', height: 32),
                 ],
               ),
               const SizedBox(height: 24),
@@ -59,7 +59,7 @@ class ReceivePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Color.fromRGBO(0,0,0,0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -76,7 +76,7 @@ class ReceivePage extends StatelessWidget {
                   trailing: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Color.fromRGBO(59,130,246,0.1),
                     ),
                     child: IconButton(
                       icon: const Icon(
@@ -124,7 +124,7 @@ class ReceivePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Color.fromRGBO(0,0,0,0.05),
                       blurRadius: 10,
                       offset: const Offset(0, -4),
                     ),

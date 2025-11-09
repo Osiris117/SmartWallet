@@ -53,7 +53,7 @@ class TransactionSuccessPage extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                Image.asset('assets/images/Logo.png', height: 32),
+                                Image.asset('assets/images/Logof.png', height: 32),
                                 const SizedBox(width: 8),
                                 const Text(
                                   'WalkYou',

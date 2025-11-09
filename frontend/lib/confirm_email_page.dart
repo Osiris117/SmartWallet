@@ -24,7 +24,7 @@ class ConfirmEmailPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Logo
-                Image.asset('assets/images/Logo.png', height: 48, errorBuilder: (c, e, s) => const SizedBox.shrink()),
+                Image.asset('assets/images/Logof.png', height: 48, errorBuilder: (c, e, s) => const SizedBox.shrink()),
                 const SizedBox(height: 18),
 
                 // Decorative illustration (reuse voice_page.png if present)
@@ -38,21 +38,21 @@ class ConfirmEmailPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Color.fromRGBO(0,0,0,0.04),
                           blurRadius: 18,
                           offset: const Offset(0, 10),
                         )
                       ],
                     ),
-                    child: Image.asset('assets/images/voice_page.png', fit: BoxFit.contain, errorBuilder: (c, e, s) => const Icon(Icons.mark_email_read, size: 96, color: Colors.blueAccent)),
+                    child: Image.asset('assets/images/Correo.png', fit: BoxFit.contain, errorBuilder: (c, e, s) => const Icon(Icons.mark_email_read, size: 96, color: Colors.blueAccent)),
                   ),
                 ),
 
                 const SizedBox(height: 18),
 
-                Text('¡Un paso más!', style: theme.textTheme.headline6?.copyWith(fontSize: 22, fontWeight: FontWeight.bold)),
+                Text('¡Un paso más!', style: theme.textTheme.titleLarge?.copyWith(fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
-                Text('Verifica tu correo electrónico', style: theme.textTheme.subtitle1?.copyWith(color: Colors.black87)),
+                Text('Verifica tu correo electrónico', style: theme.textTheme.titleMedium?.copyWith(color: Colors.black87)),
 
                 const SizedBox(height: 12),
                 Padding(
