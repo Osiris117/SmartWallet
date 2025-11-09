@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:video_player/video_player.dart';
 
 void main() {
   runApp(const DeopayApp());
@@ -20,7 +21,98 @@ class DeopayApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.interTextTheme(),
       ),
-      home: const HomeScreen(),
+      home: const WelcomeScreen(),
+    );
+  }
+}
+
+class WelcomeScreen extends StatefulWidget {
+  const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset('assets/videos/Intro.mp4')
+      ..initialize().then((_) {
+        _controller.setLooping(true);
+        _controller.setVolume(0.0);
+        _controller.play();
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _goToHome(String mode) {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF3F7FB),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(child: Image.asset('assets/images/Logo.png', height: 56)),
+              const SizedBox(height: 20),
+              const Text('¡Bienvenido a WalkYou!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              const Text('Tu billetera digital, accesible para todos.', style: TextStyle(color: Colors.black54), textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              Expanded(
+                child: Center(
+                  child: _controller.value.isInitialized
+                      ? AspectRatio(aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller))
+                      : Container(
+                          width: 240,
+                          height: 240,
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                          child: const Center(child: CircularProgressIndicator()),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3B82F6),
+                  minimumSize: const Size.fromHeight(54),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => _goToHome('voice'),
+                icon: const Icon(Icons.mic, color: Colors.white),
+                label: const Text('Continuar con Voz', style: TextStyle(color: Colors.white, fontSize: 16)),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4ADE80),
+                  minimumSize: const Size.fromHeight(54),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => _goToHome('signs'),
+                icon: const Icon(Icons.pan_tool, color: Colors.white),
+                label: const Text('Continuar con Señas', style: TextStyle(color: Colors.white, fontSize: 16)),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
