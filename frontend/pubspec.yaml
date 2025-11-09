@@ -1,5 +1,5 @@
-name: deopay
-description: A Flutter frontend for Deopay - minimal scaffold created by assistant
+name: smart_wallet
+description: A Flutter frontend for SmartWallet - Osiris117
 publish_to: 'none'
 version: 0.1.0
 environment:
@@ -13,6 +13,7 @@ dependencies:
   google_fonts: ^6.3.2
   flutter_svg: ^2.0.7
   video_player: ^2.6.0
+  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:

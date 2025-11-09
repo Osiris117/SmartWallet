@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
+import 'voice_continue_page.dart';
 
 void main() {
   runApp(const DeopayApp());
@@ -109,7 +110,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   minimumSize: const Size.fromHeight(54),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => _goToHome('voice'),
+                onPressed: () => Navigator.push(context, VoiceContinuePage.route()),
                 icon: const Icon(Icons.mic, color: Colors.white),
                 label: const Text('Continuar con Voz', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
