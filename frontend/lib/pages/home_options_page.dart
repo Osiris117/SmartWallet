@@ -22,7 +22,7 @@ class HomeOptionsPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Image.asset('assets/images/Logo.png', height: 32),
+                      Image.asset('assets/images/Logof.png', height: 32),
                       const SizedBox(width: 8),
                       const Text(
                         'WalkYou',
@@ -92,7 +92,7 @@ class HomeOptionsPage extends StatelessWidget {
                           Expanded(
                             child: _OptionCard(
                               title: 'Enviar',
-                              icon: 'assets/images/send_money.png',
+                              icon: 'assets/images/Enviar.png',
                               color: const Color(0xFFE8F1FF),
                               borderColor: const Color(0xFF93C0FF),
                               onTap: () {
@@ -104,7 +104,7 @@ class HomeOptionsPage extends StatelessWidget {
                           Expanded(
                             child: _OptionCard(
                               title: 'Recibir',
-                              icon: 'assets/images/receive_money.png',
+                              icon: 'assets/images/Recibir.png',
                               color: const Color(0xFFE7FFF3),
                               borderColor: const Color(0xFF93FFBE),
                               onTap: () {
@@ -200,8 +200,8 @@ class _BottomNavBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+                    BoxShadow(
+                      color: Color.fromRGBO(0,0,0,0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),

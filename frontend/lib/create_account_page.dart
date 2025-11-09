@@ -62,7 +62,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Logo
-                Image.asset('assets/images/Logo.png', height: 48, errorBuilder: (c, e, s) => const SizedBox.shrink()),
+                Image.asset('assets/images/Logof.png', height: 48, errorBuilder: (c, e, s) => const SizedBox.shrink()),
                 const SizedBox(height: 12),
                 Text('Crea tu cuenta', style: theme.textTheme.titleLarge?.copyWith(fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 18),
@@ -77,11 +77,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       color: const Color(0xFFF5F9FC),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 8)),
+                        BoxShadow(color: Color.fromRGBO(0,0,0,0.03), blurRadius: 12, offset: const Offset(0, 8)),
                       ],
                     ),
                     child: Image.asset(
-                      'assets/images/voice_page.png',
+                      'assets/images/Contra.png',
                       fit: BoxFit.contain,
                       errorBuilder: (c, e, s) => const SizedBox.shrink(),
                     ),
@@ -95,7 +95,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12)],
+                    boxShadow: [BoxShadow(color: Color.fromRGBO(0,0,0,0.04), blurRadius: 12)],
                   ),
                   child: Form(
                     key: _formKey,
