@@ -41,7 +41,7 @@ class ReceivePage extends StatelessWidget {
                 children: [
                   Text(
                     'Recibir',
-                    style: Theme.of(context).textTheme.headline5?.copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: const Color(0xFF1A2341),
                           fontWeight: FontWeight.bold,
                         ),

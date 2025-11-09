@@ -64,7 +64,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 // Logo
                 Image.asset('assets/images/Logo.png', height: 48, errorBuilder: (c, e, s) => const SizedBox.shrink()),
                 const SizedBox(height: 12),
-                Text('Crea tu cuenta', style: theme.textTheme.headline6?.copyWith(fontSize: 22, fontWeight: FontWeight.bold)),
+                Text('Crea tu cuenta', style: theme.textTheme.titleLarge?.copyWith(fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 18),
 
                 // Illustration (centered, similar to the mockup)

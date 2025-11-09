@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'create_account_page.dart';
+import 'main.dart'; // Importar HomeScreen
 
 class VoiceContinuePage extends StatefulWidget {
   const VoiceContinuePage({Key? key}) : super(key: key);
@@ -43,14 +44,14 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                     // If you have a logo asset, replace with Image.asset(...)
                     const SizedBox(height: 8),
                     Text('WalkYou',
-                        style: theme.textTheme.headline6?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           color: Colors.blueAccent,
                           fontWeight: FontWeight.bold,
                           fontSize: 22,
                         )),
                     const SizedBox(height: 6),
-                    Text('Iniciar sesión / Registrarse',
-                        style: theme.textTheme.caption),
+          Text('Iniciar sesión / Registrarse',
+            style: theme.textTheme.bodySmall),
                   ],
                 ),
 
@@ -75,7 +76,7 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text('¡Hola de nuevo!',
-                          style: theme.textTheme.headline6?.copyWith(
+                          style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
                           )),
@@ -150,7 +151,10 @@ class _VoiceContinuePageState extends State<VoiceContinuePage> {
                       // Sign in button
                       ElevatedButton(
                         onPressed: () {
-                          // Implement sign-in logic here
+                          // Demo mode: Login sin validación - va directo al HomeScreen
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),

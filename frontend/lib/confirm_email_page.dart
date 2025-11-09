@@ -50,9 +50,9 @@ class ConfirmEmailPage extends StatelessWidget {
 
                 const SizedBox(height: 18),
 
-                Text('¡Un paso más!', style: theme.textTheme.headline6?.copyWith(fontSize: 22, fontWeight: FontWeight.bold)),
+                Text('¡Un paso más!', style: theme.textTheme.titleLarge?.copyWith(fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
-                Text('Verifica tu correo electrónico', style: theme.textTheme.subtitle1?.copyWith(color: Colors.black87)),
+                Text('Verifica tu correo electrónico', style: theme.textTheme.titleMedium?.copyWith(color: Colors.black87)),
 
                 const SizedBox(height: 12),
                 Padding(
